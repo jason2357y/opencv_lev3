@@ -101,12 +101,12 @@ class MainWindow(QWidget):
         for x, y, w, h in faces:
             print(x, y, w, h)
             self.flist.append_face(x, y, h, w)
-            cv2.circle(img, (x+w//2, y+h//2 ), (h+w)//4, (127,127,127), 2)
+            cv2.circle(img, (x + w // 2, y + h // 2), (h + w) // 4, (127, 127, 127), 2)
             self.showImage(img)
 
     def showImage(self, img):
         height, width, color = img.shape
-        bytesPerLine = 3* width
+        bytesPerLine = 3 * width
         image = QImage(img.data, width, height, bytesPerLine, QImage.Format_RGB888)
         self.image = image.rgbSwapped()
         self.label.setPixmap(QPixmap.fromImage(self.image))
@@ -223,8 +223,8 @@ class EditWindow(QWidget):
         radiobtn = self.sender()
         self.radiochecked = radiobtn.text()
 
-class FaceList():
-    # todo pg.28~
+
+class FaceList:
     def __init__(self):
         self.face_list = []
         self.next_id = 0
@@ -234,9 +234,11 @@ class FaceList():
         self.next_id += 1
 
 
-class Face():
+class Face:
     def __init__(self, x, y, w, h, name, idx):
         self.x, self.y, self.w, self.h, self.name, self.idx = x, y, w, h, name, idx
+
+
 # activate
 if __name__ == '__main__':
     app = QApplication(sys.argv)
