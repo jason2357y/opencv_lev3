@@ -110,7 +110,7 @@ class MainWindow(QWidget):
         for x, y, w, h in faces:
             print(x, y, w, h)
             self.flist.append_face(x, y, h, w)
-            cv2.circle(img, (x + w // 2, y + h // 2), (h + w) // 4, (127, 127, 127), 2)
+            cv2.circle(img, (x + w // 2, y + h // 2), (h + w) // 4, (200, 200, 200), 2)
 
         self.showImage(img)
 
@@ -124,7 +124,7 @@ class MainWindow(QWidget):
 
     # delete face at picture
     def delFace(self):
-        if self.label.pixmap() == None:
+        if self.label.pixmap() is None:
             print('사진이 업로드 되지 않았습니다')
         elif self.flist is None or self.flist.count_face() == 0:
             print('탐색된 얼굴이 없습니다')
@@ -135,7 +135,7 @@ class MainWindow(QWidget):
     # when clicked
     def mousePressEvent(self, event):
         diag = math.inf
-        if self.delclicked == True:
+        if self.delclicked is True:
             cnt = -1
             print('(%d, %d)' % (event.x(), event.y()))
             for i in self.flist.face_list:
@@ -158,7 +158,7 @@ class MainWindow(QWidget):
 
                 for f in self.flist.face_list:  # draw
                     print(f.x, f.y, f.w, f.h, f.name, f.id)
-                    cv2.circle(img, (f.x + f.w // 2, f.y + f.h // 2), (f.w + f.h) // 4, (127, 127, 127), 2)
+                    cv2.circle(img, (f.x + f.w // 2, f.y + f.h // 2), (f.w + f.h) // 4, (200, 200, 200), 2)
 
                 self.showImage(img)
             self.delclicked = False
