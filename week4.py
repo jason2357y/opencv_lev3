@@ -30,7 +30,6 @@ class MainWindow(QWidget):
 
         self.delclicked = False
 
-
     def setWidgets(self):
         # generate, connect buttons
         self.btn1 = QPushButton('사진 업로드', self)
@@ -77,6 +76,7 @@ class MainWindow(QWidget):
         vbox.addWidget(self.label)
         vbox.addWidget(btns)
         self.setLayout(vbox)
+        vbox.setContentsMargins(0, 0, 0, 0)
 
     # show
     def loadImage(self):
@@ -96,19 +96,25 @@ class MainWindow(QWidget):
         self.editwin.setWidgets(self)
         self.editwin.show()
 
+    # draw face
     def findFace(self):
+        # find faces
         self.flist = FaceList()
         face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
         img = cv2.imread(self.imagepath, cv2.IMREAD_COLOR)
         img = cv2.resize(img, (self.imgwidth, self.imgheight))
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         faces = face_cascade.detectMultiScale(img_gray, 1.1, 4).tolist()
+
+        # add to flist
         for x, y, w, h in faces:
             print(x, y, w, h)
             self.flist.append_face(x, y, h, w)
             cv2.circle(img, (x + w // 2, y + h // 2), (h + w) // 4, (127, 127, 127), 2)
-            self.showImage(img)
 
+        self.showImage(img)
+
+    # show
     def showImage(self, img):
         height, width, color = img.shape
         bytesPerLine = 3 * width
@@ -116,6 +122,7 @@ class MainWindow(QWidget):
         self.image = image.rgbSwapped()
         self.label.setPixmap(QPixmap.fromImage(self.image))
 
+    # delete face at picture
     def delFace(self):
         if self.label.pixmap() == None:
             print('사진이 업로드 되지 않았습니다')
@@ -125,36 +132,31 @@ class MainWindow(QWidget):
             print('어느 위치를 지우시겠습니까? 원하는 위치를 클릭해 주세요.')
             self.delclicked = True
 
-
-
+    # when clicked
     def mousePressEvent(self, event):
-        diag=float(math.inf)
+        diag = math.inf
         if self.delclicked == True:
             cnt = -1
-            print('(%d, %d)'%(event.x(), event.y()))
+            print('(%d, %d)' % (event.x(), event.y()))
             for i in self.flist.face_list:
-                centx = i.x + (i.w/2)
-                centy = i.y + (i.h/2)
-                if diag > abs(math.sqrt(((centx-event.x())**2)+((centy-event.y())**2))):
-                    diag = abs(math.sqrt(((centx-event.x())**2)+((centy-event.y())**2)))
+                centx = i.x + (i.w / 2)
+                centy = i.y + (i.h / 2)
+
+                if diag > abs(math.sqrt(((centx - event.x()) ** 2) + ((centy - event.y()) ** 2))):  # closest
+                    diag = abs(math.sqrt(((centx - event.x()) ** 2) + ((centy - event.y()) ** 2)))
                     faceid = i.id
                     cnt += 1
-            print(len(self.flist.face_list), cnt)
+
             t = self.flist.face_list[cnt]
-            # todo ######################
-            float
-            check_x = t.x - event.x()
-            check_y = t.y - event.y()
-            distance = math.sqrt((check_x ** 2) + (check_y ** 2))
-            condition = distance <= (t.w + t.h) / 4
-            # todo ######################
-            print(f'x:{t.x}, y:{t.y}, w:{t.w}, h:{t.h}, dis:{distance}, rad:{(t.w + t.h) / 4}, checkx:{check_x}, checky:{check_y}')
+            condition = diag <= (t.w + t.h) / 4  # distance <= radius
+
             if condition:
-                print('removing face id: %d'%faceid)
+                print('removing face id: %d' % faceid)
                 self.flist.remove_face(faceid)
                 img = cv2.imread(self.imagepath)
                 img = cv2.resize(img, (self.imgwidth, self.imgheight))
-                for f in self.flist.face_list:
+
+                for f in self.flist.face_list:  # draw
                     print(f.x, f.y, f.w, f.h, f.name, f.id)
                     cv2.circle(img, (f.x + f.w // 2, f.y + f.h // 2), (f.w + f.h) // 4, (127, 127, 127), 2)
 
@@ -162,9 +164,9 @@ class MainWindow(QWidget):
             self.delclicked = False
 
 
-
-
+# editing window
 class EditWindow(QWidget):
+    # initialize
     def __init__(self):
         super().__init__()
         self.setWindowTitle('사진속 얼굴 태깅 어플리케이션')
@@ -276,19 +278,24 @@ class EditWindow(QWidget):
         self.radiochecked = radiobtn.text()
 
 
+# list of face
 class FaceList:
+    # initialize
     def __init__(self):
         self.face_list = []
         self.next_id = 0
 
+    # add
     def append_face(self, x, y, h, w):
         self.face_list.append(Face(x, y, w, h, '', self.next_id))
         self.next_id += 1
 
+    # count
     def count_face(self):
         len(self.face_list)
 
-    def remove_face(self,ind):
+    # delete
+    def remove_face(self, ind):
         cnt = 0
         for i in self.face_list:
             if i.id == ind:
@@ -296,8 +303,9 @@ class FaceList:
             cnt += 1
 
 
-
+# face object
 class Face:
+    # set instance attribute
     def __init__(self, x, y, w, h, name, id):
         self.x, self.y, self.w, self.h, self.name, self.id = x, y, w, h, name, id
 
