@@ -40,7 +40,8 @@ class MainWindow(QWidget):
         self.btn3.clicked.connect(self.findFace)
         self.btn4 = QPushButton('얼굴 삭제', self)
         self.btn4.clicked.connect(self.delFace)
-        self.btn5 = QPushButton('btn5', self)
+        self.btn5 = QPushButton('얼굴 추가', self)
+        self.btn5.clicked.connect(self.createAddFaceWindow)
         self.btn6 = QPushButton('btn6', self)
 
         # button 1 to 3
@@ -146,24 +147,27 @@ class MainWindow(QWidget):
                     diag = abs(math.sqrt(((centx - event.x()) ** 2) + ((centy - event.y()) ** 2)))
                     faceid = i.id
                     cnt += 1
-            try:
-                t = self.flist.face_list[cnt]
-                condition = diag <= (t.w + t.h) / 4  # distance <= radius
 
-                if condition:
-                    print('removing face id: %d' % faceid)
-                    self.flist.remove_face(faceid)
-                    img = cv2.imread(self.imagepath)
-                    img = cv2.resize(img, (self.imgwidth, self.imgheight))
+            t = self.flist.face_list[cnt]
+            condition = diag <= (t.w + t.h) / 4  # distance <= radius
 
-                    for f in self.flist.face_list:  # draw
-                        print(f.x, f.y, f.w, f.h, f.name, f.id)
-                        cv2.circle(img, (f.x + f.w // 2, f.y + f.h // 2), (f.w + f.h) // 4, (200, 200, 200), 2)
+            if condition:
+                print('removing face id: %d' % faceid)
+                self.flist.remove_face(faceid)
+                img = cv2.imread(self.imagepath)
+                img = cv2.resize(img, (self.imgwidth, self.imgheight))
 
-                    self.showImage(img)
-            except IndexError:
-                pass
+                for f in self.flist.face_list:  # draw
+                    print(f.x, f.y, f.w, f.h, f.name, f.id)
+                    cv2.circle(img, (f.x + f.w // 2, f.y + f.h // 2), (f.w + f.h) // 4, (200, 200, 200), 2)
+
+                self.showImage(img)
             self.delclicked = False
+
+    def createAddFaceWindow(self):
+        self.addfacewin = AddFaceWindow()
+        self.addfacewin.setWidgets(self)
+        self.addfacewin.show()
 
 
 # editing window
@@ -310,6 +314,39 @@ class Face:
     # set instance attribute
     def __init__(self, x, y, w, h, name, id):
         self.x, self.y, self.w, self.h, self.name, self.id = x, y, w, h, name, id
+
+
+class AddFaceWindow(MainWindow):
+    def __init__(self):
+        super().__init__()
+    def setWidgets(self, mainwindow):
+        self.setGeometry(self.left, self.top, 200, 300)
+
+        self.mlabel = SquareLabel(mainwindow.imagepath, mainwindow.imgwidth, mainwindow.imgheight)
+
+        self.btnAddFace = QPushButton('얼굴 추가', self)
+        self.btnOK = QPushButton('확인', self)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.btnAddFace)
+        vbox.addWidget(self.btnOK)
+
+        btns_widget = QWidget()
+        btns_widget.setLayout(vbox)
+
+        hbox = QHBoxLayout()
+        hbox.addWidget(self.mlabel)
+        hbox.addWidget(btns_widget)
+        self.setLayout(hbox)
+
+
+class SquareLabel(QLabel):
+    def __init__(self, imgpath, w, h):
+        super().__init__()
+        self.pixmap = QPixmap(imgpath)
+        self.pixmap_resized = self.pixmap.scaled(w,h)
+        self.setPixmap(self.pixmap_resized)
+        #todo ebook pg 20~
 
 
 # activate
