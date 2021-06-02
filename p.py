@@ -136,6 +136,8 @@ class MainWindow(QWidget):
     # when clicked
     def mousePressEvent(self, event):
         diag = math.inf
+        
+        # if enabled
         if self.delclicked is True:
             cnt = -1
             print('(%d, %d)' % (event.x(), event.y()))
@@ -143,6 +145,7 @@ class MainWindow(QWidget):
                 centx = i.x + (i.w / 2)
                 centy = i.y + (i.h / 2)
 
+                # is in cricle
                 if diag > abs(math.sqrt(((centx - event.x()) ** 2) + ((centy - event.y()) ** 2))):  # closest
                     diag = abs(math.sqrt(((centx - event.x()) ** 2) + ((centy - event.y()) ** 2)))
                     faceid = i.id
@@ -151,6 +154,7 @@ class MainWindow(QWidget):
             t = self.flist.face_list[cnt]
             condition = diag <= (t.w + t.h) / 4  # distance <= radius
 
+            # delete
             if condition:
                 print('removing face id: %d' % faceid)
                 self.flist.remove_face(faceid)
@@ -163,7 +167,8 @@ class MainWindow(QWidget):
 
                 self.showImage(img)
             self.delclicked = False
-
+            
+    # open faceadd window
     def createAddFaceWindow(self):
         self.addfacewin = AddFaceWindow()
         self.addfacewin.setWidgets(self)
@@ -177,6 +182,7 @@ class EditWindow(QWidget):
         super().__init__()
         self.setWindowTitle('사진속 얼굴 태깅 어플리케이션')
 
+        # pos
         self.left = 500
         self.top = 200
         self.width = 400
@@ -205,6 +211,7 @@ class EditWindow(QWidget):
         self.radiobtn1.setChecked(True)
         self.radiochecked = '원본'
 
+        # connect radiobuttons
         self.radiobtn1.toggled.connect(self.btnstate)
         self.radiobtn2.toggled.connect(self.btnstate)
         self.radiobtn3.toggled.connect(self.btnstate)
@@ -241,6 +248,7 @@ class EditWindow(QWidget):
             mainwindow.imgheight = int(imgheight_edited)
             image = Image.open(mainwindow.originalpath)
 
+            # change color
             if self.radiochecked == '회색 계열':
                 img_edited = image.convert('L')
 
@@ -315,32 +323,43 @@ class Face:
     def __init__(self, x, y, w, h, name, id):
         self.x, self.y, self.w, self.h, self.name, self.id = x, y, w, h, name, id
 
-
+# add face
 class AddFaceWindow(MainWindow):
+    # initialize
     def __init__(self):
         super().__init__()
+        
+    # generate widgets
     def setWidgets(self, mainwindow):
+        # pos
         self.setGeometry(self.left, self.top, 200, 300)
 
+        #label obj(main)
         self.mlabel = SquareLabel(mainwindow.imagepath, mainwindow.imgwidth, mainwindow.imgheight)
 
+        # buttons
         self.btnAddFace = QPushButton('얼굴 추가', self)
         self.btnOK = QPushButton('확인', self)
 
+        # layout(buttons)
         vbox = QVBoxLayout()
         vbox.addWidget(self.btnAddFace)
         vbox.addWidget(self.btnOK)
 
+        # set layout
         btns_widget = QWidget()
         btns_widget.setLayout(vbox)
 
+        #set main window layout
         hbox = QHBoxLayout()
         hbox.addWidget(self.mlabel)
         hbox.addWidget(btns_widget)
         self.setLayout(hbox)
 
 
+# label
 class SquareLabel(QLabel):
+    #initialize
     def __init__(self, imgpath, w, h):
         super().__init__()
         self.pixmap = QPixmap(imgpath)
