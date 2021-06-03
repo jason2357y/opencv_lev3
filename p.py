@@ -1,6 +1,6 @@
 # import libs
 import sys
-from PyQt5.QtGui import *
+from PyQt5.QtGui import QPixmap, QImage, QPainter, QPen, QColor
 from PyQt5.QtWidgets import *
 from PIL import Image
 import cv2
@@ -365,7 +365,26 @@ class SquareLabel(QLabel):
         self.pixmap = QPixmap(imgpath)
         self.pixmap_resized = self.pixmap.scaled(w,h)
         self.setPixmap(self.pixmap_resized)
-        #todo ebook pg 20~
+        self.left_clicking=False
+        
+        painter=QPainter(self.pixmap_resized)
+        painter.setPen(QPen(QColor('gray'), 2))
+        for f in faceList.face_list:
+            print(f.x, f.y, f.w, f.h)
+            painter.drawEllipse(f.x, f.y, f.w, f.h)
+        
+        self.setPixmap(self.pixmap_resized)
+        
+        def mousePressEvent(self, event):
+            print('mousePressEvent', event.x(), event.y(), event.button())
+            
+        def mouseReleaseEvent(self, event):
+            print('mouseReleaseEvent', event.x(), event.y(), event.button())
+            
+        def mouseMoveEvent(self, event):
+            print('mouseMoveEvent', event.x(), event.y())
+            
+        
 
 
 # activate
