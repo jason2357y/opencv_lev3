@@ -376,13 +376,15 @@ class SquareLabel(QLabel):
         self.setPixmap(self.pixmap_resized)
         
         def mousePressEvent(self, event):
-            print('mousePressEvent', event.x(), event.y(), event.button())
-            
+            # print('mousePressEvent', event.x(), event.y(), event.button())
+            if event.button()==1:
+                self.startX=event.x()
+                self.startY=event.y()
         def mouseReleaseEvent(self, event):
-            print('mouseReleaseEvent', event.x(), event.y(), event.button())
+            # print('mouseReleaseEvent', event.x(), event.y(), event.button())
             
         def mouseMoveEvent(self, event):
-            print('mouseMoveEvent', event.x(), event.y())
+            # print('mouseMoveEvent', event.x(), event.y())
             
         
 
