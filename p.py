@@ -87,7 +87,7 @@ class MainWindow(QWidget):
 
     # select
     def getPhotoPath(self):
-        fname = QFileDialog.getOpenFileName(self, 'open file', './img')
+        fname = QFileDialog.getOpenFileName(self, 'open file', './images')
         self.originalpath = self.imagepath = fname[0]
         self.loadImage()
 
@@ -279,8 +279,8 @@ class EditWindow(QWidget):
             if self.radiochecked == '원본':
                 img_edited = image
 
-            img_edited.save('./img/img_edited.png', 'PNG')
-            mainwindow.imagepath = './img/img_edited.png'
+            img_edited.save('./images/img_edited.png', 'PNG')
+            mainwindow.imagepath = './images/img_edited.png'
             mainwindow.loadImage()
             self.close()
         except ValueError:
@@ -336,10 +336,11 @@ class AddFaceWindow(MainWindow):
         self.setGeometry(self.left, self.top, 200, 300)
 
         # label obj(main)
-        self.mlabel = SquareLabel(mainwindow.imagepath, mainwindow.imgwidth, mainwindow.imgheight, mainwindow.faceList)
+        self.mlabel = SquareLabel(mainwindow.imagepath, mainwindow.imgwidth, mainwindow.imgheight, mainwindow.flist)
 
         # buttons
         self.btnAddFace = QPushButton('얼굴 추가', self)
+        self.btnAddFace.clicked.connect(lambda: self.mlabel.addFace())
         self.btnOK = QPushButton('확인', self)
 
         # layout(buttons)
@@ -370,7 +371,7 @@ class SquareLabel(QLabel):
 
         painter = QPainter(self.pixmap_resized)
         painter.setPen(QPen(QColor('gray'), 2))
-        for f in faceList.faelist:
+        for f in faceList.face_list:
             print(f.x, f.y, f.w, f.h)
             painter.drawEllipse(f.x, f.y, f.w, f.h)
 
@@ -392,9 +393,16 @@ class SquareLabel(QLabel):
         def mouseMoveEvent(self, event):
             # print('mouseMoveEvent', event.x(), event.y())
             if self.left_clicking:
-                painter = QPainter(self.pixmap_resized)
+                self.pixmap_temp = self.pixmap_resized.copy()
+
+                painter = QPainter(self.pixmap_temp)
                 painter.setPen(QPen(QColor('green'), 2))
                 painter.drawEllipse(self.startX, self.startY, event.x()-self.startX, event.y()-self.startX)
+
+                self.setPixmap(self.pixmap_temp)
+
+        def addFace(self):
+            print('addFace clicked')
 
 
 # activate
