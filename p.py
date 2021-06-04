@@ -136,7 +136,7 @@ class MainWindow(QWidget):
     # when clicked
     def mousePressEvent(self, event):
         diag = math.inf
-        
+
         # if enabled
         if self.delclicked is True:
             cnt = -1
@@ -167,7 +167,7 @@ class MainWindow(QWidget):
 
                 self.showImage(img)
             self.delclicked = False
-            
+
     # open faceadd window
     def createAddFaceWindow(self):
         self.addfacewin = AddFaceWindow()
@@ -323,19 +323,20 @@ class Face:
     def __init__(self, x, y, w, h, name, id):
         self.x, self.y, self.w, self.h, self.name, self.id = x, y, w, h, name, id
 
+
 # add face
 class AddFaceWindow(MainWindow):
     # initialize
     def __init__(self):
         super().__init__()
-        
+
     # generate widgets
     def setWidgets(self, mainwindow):
         # pos
         self.setGeometry(self.left, self.top, 200, 300)
 
-        #label obj(main)
-        self.mlabel = SquareLabel(mainwindow.imagepath, mainwindow.imgwidth, mainwindow.imgheight)
+        # label obj(main)
+        self.mlabel = SquareLabel(mainwindow.imagepath, mainwindow.imgwidth, mainwindow.imgheight, mainwindow.faceList)
 
         # buttons
         self.btnAddFace = QPushButton('얼굴 추가', self)
@@ -350,7 +351,7 @@ class AddFaceWindow(MainWindow):
         btns_widget = QWidget()
         btns_widget.setLayout(vbox)
 
-        #set main window layout
+        # set main window layout
         hbox = QHBoxLayout()
         hbox.addWidget(self.mlabel)
         hbox.addWidget(btns_widget)
@@ -359,34 +360,41 @@ class AddFaceWindow(MainWindow):
 
 # label
 class SquareLabel(QLabel):
-    #initialize
-    def __init__(self, imgpath, w, h):
+    # initialize
+    def __init__(self, imgpath, w, h, faceList):
         super().__init__()
         self.pixmap = QPixmap(imgpath)
-        self.pixmap_resized = self.pixmap.scaled(w,h)
+        self.pixmap_resized = self.pixmap.scaled(w, h)
         self.setPixmap(self.pixmap_resized)
-        self.left_clicking=False
-        
-        painter=QPainter(self.pixmap_resized)
+        self.left_clicking = False
+
+        painter = QPainter(self.pixmap_resized)
         painter.setPen(QPen(QColor('gray'), 2))
-        for f in faceList.face_list:
+        for f in faceList.faelist:
             print(f.x, f.y, f.w, f.h)
             painter.drawEllipse(f.x, f.y, f.w, f.h)
-        
+
         self.setPixmap(self.pixmap_resized)
-        
+
         def mousePressEvent(self, event):
             # print('mousePressEvent', event.x(), event.y(), event.button())
-            if event.button()==1:
-                self.startX=event.x()
-                self.startY=event.y()
+            if event.button() == 1:
+                self.startX = event.x()
+                self.startY = event.y()
+                self.left_clicking = True
+
         def mouseReleaseEvent(self, event):
             # print('mouseReleaseEvent', event.x(), event.y(), event.button())
-            
+            if event.button() == 1:
+                self.finishX = event.x()
+                self.finishY = event.y()
+
         def mouseMoveEvent(self, event):
             # print('mouseMoveEvent', event.x(), event.y())
-            
-        
+            if self.left_clicking:
+                painter = QPainter(self.pixmap_resized)
+                painter.setPen(QPen(QColor('green'), 2))
+                painter.drawEllipse(self.startX, self.startY, event.x()-self.startX, event.y()-self.startX)
 
 
 # activate
