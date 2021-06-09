@@ -342,21 +342,29 @@ class AddFaceWindow(MainWindow):
         self.btnAddFace = QPushButton('얼굴 추가', self)
         self.btnAddFace.clicked.connect(lambda: self.mlabel.addFace())
         self.btnOK = QPushButton('확인', self)
+        self.btnOK.clicked.connect(lambda: self.finishFace(mainwindow))
 
         # layout(buttons)
         vbox = QVBoxLayout()
         vbox.addWidget(self.btnAddFace)
         vbox.addWidget(self.btnOK)
+        vbox.setContentsMargins(0, 0, 0, 0)
 
         # set layout
         btns_widget = QWidget()
         btns_widget.setLayout(vbox)
+        vbox.setContentsMargins(0, 0, 0, 0)
 
         # set main window layout
         hbox = QHBoxLayout()
         hbox.addWidget(self.mlabel)
         hbox.addWidget(btns_widget)
+        hbox.setContentsMargins(0,0,0,0)
         self.setLayout(hbox)
+
+    def finishFace(self, mainwindow):
+        mainwindow.label.setPixmap(self.mlabel.pixmap_resized)
+        self.close()
 
 
 # label
@@ -368,41 +376,54 @@ class SquareLabel(QLabel):
         self.pixmap_resized = self.pixmap.scaled(w, h)
         self.setPixmap(self.pixmap_resized)
         self.left_clicking = False
+        self.faceList = faceList
 
         painter = QPainter(self.pixmap_resized)
-        painter.setPen(QPen(QColor('gray'), 2))
+        painter.setPen(QPen(QColor(200, 200, 200), 2))
         for f in faceList.face_list:
             print(f.x, f.y, f.w, f.h)
             painter.drawEllipse(f.x, f.y, f.w, f.h)
 
         self.setPixmap(self.pixmap_resized)
 
-        def mousePressEvent(self, event):
-            # print('mousePressEvent', event.x(), event.y(), event.button())
-            if event.button() == 1:
-                self.startX = event.x()
-                self.startY = event.y()
-                self.left_clicking = True
+    def mousePressEvent(self, event):
+        # print('mousePressEvent', event.x(), event.y(), event.button())
+        if event.button() == 1:
+            self.startX = event.x()
+            self.startY = event.y()
+            self.left_clicking = True
 
-        def mouseReleaseEvent(self, event):
-            # print('mouseReleaseEvent', event.x(), event.y(), event.button())
-            if event.button() == 1:
-                self.finishX = event.x()
-                self.finishY = event.y()
+    def mouseReleaseEvent(self, event):
+        # print('mouseReleaseEvent', event.x(), event.y(), event.button())
+        if event.button() == 1:
+            self.finishX = event.x()
+            self.finishY = event.y()
 
-        def mouseMoveEvent(self, event):
-            # print('mouseMoveEvent', event.x(), event.y())
-            if self.left_clicking:
-                self.pixmap_temp = self.pixmap_resized.copy()
+    def mouseMoveEvent(self, event):
+        # print('mouseMoveEvent', event.x(), event.y())
+        if self.left_clicking:
+            self.pixmap_temp = self.pixmap_resized.copy()
 
-                painter = QPainter(self.pixmap_temp)
-                painter.setPen(QPen(QColor('green'), 2))
-                painter.drawEllipse(self.startX, self.startY, event.x()-self.startX, event.y()-self.startX)
+            painter = QPainter(self.pixmap_temp)
+            painter.setPen(QPen(QColor('green'), 2))
+            r=int(((self.startX-event.x())**2+(self.startY-event.y())**2)**0.5)
+            painter.drawEllipse(self.startX-r, self.startY-r, 2*r, 2*r)
 
-                self.setPixmap(self.pixmap_temp)
+            self.setPixmap(self.pixmap_temp)
 
-        def addFace(self):
-            print('addFace clicked')
+    def addFace(self):
+        print('addFace clicked')
+        try:
+            r = int(((self.startX - self.finishX) ** 2 + (self.startY - self.finishY) ** 2) ** 0.5)
+            x, y, w, h = self.startX-r, self.startY-r, 2*r, 2*r
+            self.faceList.append_face(x,y,w,h)
+            painter =QPainter(self.pixmap_resized)
+            painter.setPen(QPen(QColor(200, 200, 200), 2))
+            painter.drawEllipse(x,y,w,h)
+
+            self.setPixmap(self.pixmap_resized)
+        except AttributeError:
+            pass
 
 
 # activate
