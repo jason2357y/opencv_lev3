@@ -342,7 +342,7 @@ class AddFaceWindow(MainWindow):
         self.setGeometry(self.left, self.top, 200, 300)
 
         # label obj(main)
-        self.mlabel = SquareLabel(mainwindow.imagepath, mainwindow.imgwidth, mainwindow.imgheight, mainwindow.flist)
+        self.mlabel = SquareLabel(mainwindow.label.pixmap(), mainwindow.imgwidth, mainwindow.imgheight, mainwindow.flist)
 
         # buttons
         self.btnAddFace = QPushButton('얼굴 추가', self)
@@ -376,16 +376,16 @@ class AddFaceWindow(MainWindow):
 # label
 class SquareLabel(QLabel):
     # initialize
-    def __init__(self, imgpath, w, h, faceList):
+    def __init__(self, pixmap, w, h, faceList):
         super().__init__()
-        self.pixmap = QPixmap(imgpath)
+        self.pixmap = pixmap
         self.pixmap_resized = self.pixmap.scaled(w, h)
         self.setPixmap(self.pixmap_resized)
         self.left_clicking = False
         self.faceList = faceList
 
         painter = QPainter(self.pixmap_resized)
-        painter.setPen(QPen(QColor(200, 200, 200), 2))
+        painter.setPen(QPen(QColor(200, 200, 200), 3))
         for f in faceList.face_list:
             print(f.x, f.y, f.w, f.h)
             painter.drawEllipse(f.x, f.y, f.w, f.h)
@@ -411,7 +411,7 @@ class SquareLabel(QLabel):
             self.pixmap_temp = self.pixmap_resized.copy()
 
             painter = QPainter(self.pixmap_temp)
-            painter.setPen(QPen(QColor('green'), 2))
+            painter.setPen(QPen(QColor('green'), 3))
             r=int(((self.startX-event.x())**2+(self.startY-event.y())**2)**0.5)
             painter.drawEllipse(self.startX-r, self.startY-r, 2*r, 2*r)
 
@@ -424,7 +424,7 @@ class SquareLabel(QLabel):
             x, y, w, h = self.startX-r, self.startY-r, 2*r, 2*r
             self.faceList.append_face(x,y,w,h)
             painter =QPainter(self.pixmap_resized)
-            painter.setPen(QPen(QColor(200, 200, 200), 2))
+            painter.setPen(QPen(QColor(200, 200, 200), 3))
             painter.drawEllipse(x,y,w,h)
 
             self.setPixmap(self.pixmap_resized)
@@ -437,10 +437,10 @@ class TagNameWindow(MainWindow):
         super().__init__()
     def setWidgets(self, mainwindow):
         self.setGeometry(self.left, self.top, 200, 300)
-        self.mlabel = TaggingLabel(mainwindow.imagepath, mainwindow.width, mainwindow.height, mainwindow.flist)
+        self.mlabel = TaggingLabel(mainwindow.label.pixmap(), mainwindow.width, mainwindow.height, mainwindow.flist)
 
         self.btnSave = QPushButton('저장', self)
-        self.btnSave.clicked.connect(lambda : self.mlabel.saveFile(mainwindow))
+        self.btnSave.clicked.connect(lambda : self.mlabel.saveFile())
         self.btnOK = QPushButton('확인', self)
         self.btnOK.clicked.connect(lambda : self.finishTag(mainwindow))
 
@@ -460,8 +460,8 @@ class TagNameWindow(MainWindow):
         self.close()
 
 class TaggingLabel(SquareLabel):
-    def __init__(self, imgpath, w, h, faceList):
-        super().__init__(imgpath, w, h, faceList)
+    def __init__(self, pixmap, w, h, faceList):
+        super().__init__(pixmap, w, h, faceList)
 
     def mousePressEvent(self, event):
         for f in self.faceList.face_list:
@@ -485,9 +485,9 @@ class TaggingLabel(SquareLabel):
             painter.drawText(f.x, f.y - 5, f.name)
         painter.end()
         self.setPixmap(self.pixmap_temp)
-    def saveFile(self, mainwindow):
+    def saveFile(self):
         text, okPressed = QInputDialog.getText(self, '파일이름입력창', '파일명', QLineEdit.Normal)
-        if okPressed
+        if okPressed:
             self.pixmap_temp.save(text + '.jpg', 'JPG')
 
 # activate
