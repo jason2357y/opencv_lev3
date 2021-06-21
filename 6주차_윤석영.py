@@ -368,6 +368,7 @@ class AddFaceWindow(MainWindow):
         hbox.setContentsMargins(0,0,0,0)
         self.setLayout(hbox)
 
+    # close window
     def finishFace(self, mainwindow):
         mainwindow.label.setPixmap(self.mlabel.pixmap_resized)
         self.close()
@@ -417,6 +418,7 @@ class SquareLabel(QLabel):
 
             self.setPixmap(self.pixmap_temp)
 
+    # draw face
     def addFace(self):
         print('addFace clicked')
         try:
@@ -431,10 +433,12 @@ class SquareLabel(QLabel):
         except AttributeError:
             pass
 
-
+# name tagging window
 class TagNameWindow(MainWindow):
+    # initialize
     def __init__(self):
         super().__init__()
+    # create widget
     def setWidgets(self, mainwindow):
         self.setGeometry(self.left, self.top, 200, 300)
         self.mlabel = TaggingLabel(mainwindow.label.pixmap(), mainwindow.width, mainwindow.height, mainwindow.flist)
@@ -455,14 +459,17 @@ class TagNameWindow(MainWindow):
         hbox.addWidget(self.mlabel)
         hbox.addWidget(buttons_widget)
         self.setLayout(hbox)
+    # close window
     def finishTag(self, mainwindow):
         mainwindow.label.setPixmap(self.mlabel.pixmap_temp)
         self.close()
 
+# label
 class TaggingLabel(SquareLabel):
     def __init__(self, pixmap, w, h, faceList):
         super().__init__(pixmap, w, h, faceList)
 
+    # input name
     def mousePressEvent(self, event):
         for f in self.faceList.face_list:
             if int((f.w**2+f.h**2)**0.5) >= int(((f.x-event.x())**2+(f.y-event.y())**2)**0.5):
@@ -477,6 +484,7 @@ class TaggingLabel(SquareLabel):
         pass
     def mouseMoveEvent(self, event):
         pass
+    # draw
     def drawNames(self):
         self.pixmap_temp = self.pixmap_resized.copy()
         painter = QPainter(self.pixmap_temp)
@@ -485,6 +493,7 @@ class TaggingLabel(SquareLabel):
             painter.drawText(f.x, f.y - 5, f.name)
         painter.end()
         self.setPixmap(self.pixmap_temp)
+    # save
     def saveFile(self):
         text, okPressed = QInputDialog.getText(self, '파일이름입력창', '파일명', QLineEdit.Normal)
         if okPressed:
